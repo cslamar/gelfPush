@@ -23,12 +23,14 @@ while( <> ) {
 
 use Term::ANSIColor qw(:constants);
 if( $timeServed < 1000000 ) {
+	print "All is well!\n";
 	print "Time Served (Microseconds): ";
 	print BOLD, GREEN, $timeServed . "\n", RESET;
 	print "Time Served (Seconds): ";
 	print BOLD, GREEN, ($timeServed / 1000000), RESET;
 	print "\n";
 } else {
+	print "Oh no!!!\n";
 	print "Time Served (Microseconds): ";
 	print BOLD, RED, $timeServed . "\n", RESET;
 	print "Time Served (Seconds): ";
