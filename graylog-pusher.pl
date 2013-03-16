@@ -38,7 +38,7 @@ sub sendToGraylog {
 	gzip \$json_doc => \$gzipped_message or die "gzip failed! $GzipError\n\n";
 
 	my $socket = new IO::Socket::INET (
-		PeerHost => 'logging.lcgosc.com',
+		PeerHost => 'hostname.slamar.com',
 		PeerPort => '12201',
 		Proto => 'udp',
 	) or die "Error in socket creation : $!\n";
