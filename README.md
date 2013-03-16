@@ -1,7 +1,7 @@
 gelfPush
 ========
 
-Daemon to push configs to Graylog2 via GELF
+Daemon to push log messages to Graylog2 via GELF
 
 Perl modules you'll need
 * Config::Simple
