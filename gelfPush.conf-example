@@ -1,0 +1,5 @@
+[APACHE_LOGGING]
+graylog2_server="graylog2.slamar.com"
+facility="Apache Access Logs"
+logfile="test.log"
+

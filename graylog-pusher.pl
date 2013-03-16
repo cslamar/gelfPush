@@ -6,11 +6,23 @@ use IO::Compress::Gzip qw( gzip $GzipError );
 use IO::Socket::INET;
 use File::Tail;
 use Term::ANSIColor qw(:constants);
+use Config::Simple;
 
 my $counter = 0;
-my $logfile = 'test.log';
-my $facility = 'Apache Access';
-my $level;
+# my $logfile = 'test.log';
+# my $facility = 'Apache Access';
+my ($level, %Config);
+
+### Read the config file in and set variables ###
+Config::Simple->import_from('example-conf.ini', \%Config);
+my $logfile = $Config{"APACHE_LOGGING.logfile"};
+my $facility = $Config{"APACHE_LOGGING.facility"};
+
+### Debugging lines ###
+print $Config{"APACHE_LOGGING.graylog2_server"} . "\n";
+print $Config{"APACHE_LOGGING.facility"} . "\n";
+print $Config{"APACHE_LOGGING.logfile"} . "\n";
+
 
 sub sendToGraylog {
 	# level, facility, file, short, long
@@ -38,7 +50,7 @@ sub sendToGraylog {
 	gzip \$json_doc => \$gzipped_message or die "gzip failed! $GzipError\n\n";
 
 	my $socket = new IO::Socket::INET (
-		PeerHost => 'hostname.slamar.com',
+		PeerHost => $Config{"APACHE_LOGGING.graylog2_server"},
 		PeerPort => '12201',
 		Proto => 'udp',
 	) or die "Error in socket creation : $!\n";
@@ -67,6 +79,7 @@ while( defined( my $line = $file->read ) ) {
 	}
 	print "$counter: Level: $level\n";
 	
+	### Format: level, facility, file, short, long
 	sendToGraylog( $level, $facility, $logfile, $short, $line );
 	$counter++;
 }
