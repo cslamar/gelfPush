@@ -5,9 +5,12 @@ use JSON::XS;
 use IO::Compress::Gzip qw( gzip $GzipError );
 use IO::Socket::INET;
 use File::Tail;
+use Term::ANSIColor qw(:constants);
 
 my $counter = 0;
 my $logfile = 'test.log';
+my $facility = 'Apache Access';
+my $level;
 
 sub sendToGraylog {
 	# level, facility, file, short, long
@@ -19,12 +22,12 @@ sub sendToGraylog {
 	my $gelf_format = { 
 	        "version" => "1.0",
 	        "host" => "$hostname",
-	        "short_message" => "some short message",
-	        "full_message" => "Really long message",
+	        "short_message" => "$_[3]",
+	        "full_message" => "$_[4]",
    	     	"timestamp" => "$datetime",
-   	     	"level"=> "6",
-        	"facility"=> "Test",
-        	"file"=> "/path/to/file",
+   	     	"level"=> "$_[0]",
+        	"facility"=> "$_[1]",
+        	"file"=> "$_[2]",
     };
 
 	my $json_doc = encode_json($gelf_format);
@@ -43,19 +46,27 @@ sub sendToGraylog {
 	print "UDP Connection sucessful!!!\n";
 
 	print "Sending Message...\n";
-	#$socket->send($gzipped_message);
+	$socket->send($gzipped_message);
 	$socket->close();
 }
 
 my $file = File::Tail->new(name => $logfile, interval=>1, maxinterval=>1);
 while( defined( my $line = $file->read ) ) {
 	chomp($line);
-	($short) = $line =~ m/^.{1,20}/;
+	($short) = $line =~ m/(.{1,40})/;
 	print "$counter: Short: $short\n";
 	print "$counter: Long: $line\n";
 	print "$counter: Facility: Testing\n";
-	($host, $remote_logname, $remote_user, $timestamp, $request, $statusCode, $size_of_request, $refer, $user_agent, $timeServed, $pid, $hostname) = $_ =~ m/^(\S+) (\S+) (\S+) \[(.+)\] "(\S+ \S+ \S+)" (\S+) (\S+) "(.+)" "(.+)" (\S+) (\S+) (\S+)/g;
-	print "$counter: Time Served: $timeServed\n";
+	($host, $remote_logname, $remote_user, $timestamp, $request, $statusCode, $size_of_request, $refer, $user_agent, $timeServed, $pid, $hostname) = $line =~ m/^(\S+) (\S+) (\S+) \[(.+)\] "(\S+ \S+ \S+)" (\S+) (\S+) "(.+)" "(.+)" (\S+) (\S+) (\S+)/g;
+	if( $timeServed < 1000000 ) {
+		print BOLD, GREEN, "$counter: Time Served: $timeServed\n", RESET;
+		$level = 6;
+	} else {
+		print BOLD, RED, "$counter: Time Served: $timeServed\n", RESET;
+		$level = 3;
+	}
+	print "$counter: Level: $level\n";
 	
+	sendToGraylog( $level, $facility, $logfile, $short, $line );
 	$counter++;
 }
