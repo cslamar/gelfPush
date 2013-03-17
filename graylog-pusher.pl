@@ -9,12 +9,11 @@ use Term::ANSIColor qw(:constants);
 use Config::Simple;
 
 my $counter = 0;
-# my $logfile = 'test.log';
-# my $facility = 'Apache Access';
 my ($level, %Config);
 
 ### Read the config file in and set variables ###
 Config::Simple->import_from('example-conf.ini', \%Config);
+# Config::Simple->import_from('/etc/gelfPush.conf', \%Config);
 my $logfile = $Config{"APACHE_LOGGING.logfile"};
 my $facility = $Config{"APACHE_LOGGING.facility"};
 
