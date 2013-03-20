@@ -12,12 +12,9 @@ my $counter = 0;
 my ($level, %Config);
 
 ### Read the config file in and set variables ###
-<<<<<<< HEAD
-Config::Simple->import_from('gelfPush.conf', \%Config);
-=======
 Config::Simple->import_from('gelfPush.conf-example', \%Config);
->>>>>>> regex_config
 # Config::Simple->import_from('/etc/gelfPush.conf', \%Config);
+
 my $logfile = $Config{"APACHE_LOGGING.logfile"};
 my $facility = $Config{"APACHE_LOGGING.facility"};
 
