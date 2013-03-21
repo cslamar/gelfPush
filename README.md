@@ -7,4 +7,4 @@ Perl modules you'll need
 * Config::Simple
 * JSON::XS
 * File::Tail
-
+* Config::INI::Reader

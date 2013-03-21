@@ -6,7 +6,7 @@ use IO::Compress::Gzip qw( gzip $GzipError );
 use IO::Socket::INET;
 use File::Tail;
 use Term::ANSIColor qw(:constants);
-use Config::Simple;
+use Config::INI::Reader;
 
 my $counter = 0;
 my ($level, %Config);
