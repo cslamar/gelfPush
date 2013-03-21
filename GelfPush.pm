@@ -55,6 +55,38 @@ sub sendToGraylog {
 	print "Message Sent!\n";
 }
 
+sub watcher_apache_access {
+	### ARGS: Hostname
+	#
+	# Assumed Log Format:
+	# "%h - %{X-Forwarded-For}i - %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\""
+	
+	my $hostname = $_[0];
+	
+	### Production def
+	# my $file = File::Tail->new(name => '/var/www/httpd/access_log', interval=>1, maxinterval=>1);
+	my $file = File::Tail->new(name => 'logs/access.log', interval=>1, maxinterval=>1);
+	
+	while( defined( my $line = $file->read ) ) {
+		chomp($line);
+		(my $request, my $statusCode) = $line =~ m/\S+ - \S+ - \S+ \S+ \[.*\] \"(.*)\" (\d+) \S+ \".*\" \".*\"/;
+		# $rule =~ m/(\S+) - (\S+) - (\S+) (\S+) (\[.*\]) (\".*\") (\d+) (\S+) (\".*\") (\".*\")/;
+		# print "$1\n$2\n$3\n$4\n$5\n$6\n$7\n$8\n$9\n$10\n";
+		print "Request: $request\n";
+		print "Status Code: $statusCode\n";
+		(my $short) = $request =~ m/(^.{1,30})/;
+		if( $statusCode =~ m/401|403|500|502|503/ ) {
+			print "Error!!! $statusCode returned!\n";
+			print "Short: $short\n";
+			sendToGraylog( 3, 'Apache Access', '/var/log/httpd/access_log', $short, $line, $hostname );
+		} else {
+			print "Ok!  $statusCode returned!\n";
+			print "Short: $short\n";
+			sendToGraylog( 6, 'Apache Access', '/var/log/httpd/access_log', $short, $line, $hostname );
+		}
+	}
+}
+
 sub watcher_secure {
 	### ARGS: Hostname
 	
