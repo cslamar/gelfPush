@@ -16,13 +16,18 @@ sub INT_handler {
 		$thr->kill('KILL')->join();
 		$counter++;	
 	}
-	exit(0);
+	exit(-1);
 }
 sub HUP_handler {
-	print "Time to restart!\n";
+	print "Time to write a restart function!!\n";
 }
 sub TERM_handler {
-	print "Bye Bye\n";
+	print "Getting ready to kill some threads for you!!\n";
+	foreach my $thr (threads->list()) {
+		print "Thread " . $thr->tid() . " is about to die!\n";
+		$thr->kill('KILL')->join();
+		$counter++;	
+	}
 	exit(0);
 }
 
