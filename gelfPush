@@ -7,13 +7,36 @@ use Config::INI::Reader;
 use Data::Dumper;
 use threads;
 
-my (@inis_enabled, $graylog2_sever);
+my $counter = 0;
+
+sub INT_handler {
+	print "Hi There!  Getting a list of threads for you!\n";
+	foreach my $thr (threads->list()) {
+		print "Thread " . $thr->tid() . " is about to die!\n";
+		$thr->kill('KILL')->join();
+		$counter++;	
+	}
+	exit(0);
+}
+sub HUP_handler {
+	print "Time to restart!\n";
+}
+sub TERM_handler {
+	print "Bye Bye\n";
+	exit(0);
+}
+
+$SIG{'INT'} = 'INT_handler';
+$SIG{'HUP'} = 'HUP_handler';
+$SIG{'TERM'} = 'TERM_handler';
+
+my (@inis_enabled, $graylog2_sever, @watcherThreads);
 
 ### Read the config file in and set variables ###
-my $config = Config::INI::Reader->read_file('gelfPush.conf');
+my $config = Config::INI::Reader->read_file('gelfPush.conf') or die("$!\n");
 
 ### Production:
-# my $config = Config::INI::Reader->read_file('/etc/gelfPush.conf');
+# my $config = Config::INI::Reader->read_file('/etc/gelfPush.conf') or die("$!\n");
 
 foreach my $block (keys %$config) {
 	print "Keys: $block\n";
@@ -22,15 +45,19 @@ foreach my $block (keys %$config) {
 	}
 }
 
-print "Inis enabled:\n";
+print "Inis enabled: " . @inis_enabled . "\n";
 print Dumper( @inis_enabled );
 $graylog2_server = $config->{'GLOBAL'}->{'graylog2_sever'};
 print "Server: $graylog2_server\n";
 
 for my $action (@inis_enabled) {
 	print "Action: $action\n";
-	my $thr = threads->create( \&spawn_watcher, $graylog2_server, $action )->detach();
+#	my $thr = threads->create( \&spawn_watcher, $graylog2_server, $action )->detach();
+	my $thr = threads->create( \&spawn_watcher, $graylog2_server, $action );
+	push(@watcherThreads, $thr);
 }
+
+
 
 while(1) { }
 

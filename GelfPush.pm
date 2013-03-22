@@ -9,6 +9,7 @@ use JSON::XS;
 use IO::Compress::Gzip qw( gzip $GzipError );
 use IO::Socket::INET;
 use File::Tail;
+use threads;
 
 $VERSION		= 0.0.1;
 @ISA			= qw(Exporter);
@@ -63,6 +64,8 @@ sub watcher_apache_access {
 	
 	my $hostname = $_[0];
 	
+	$SIG{'KILL'} = sub { threads->exit(); };
+	
 	### Production def
 	# my $file = File::Tail->new(name => '/var/www/httpd/access_log', interval=>1, maxinterval=>1);
 	my $file = File::Tail->new(name => 'logs/access.log', interval=>1, maxinterval=>1);
@@ -91,6 +94,8 @@ sub watcher_secure {
 	### ARGS: Hostname
 	
 	my $hostname = $_[0];
+	
+	$SIG{'KILL'} = sub { threads->exit(); };
 	
 	### Production def
 	# my $file = File::Tail->new(name => '/var/log/secure', interval=>1, maxinterval=>1);
