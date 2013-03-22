@@ -11,6 +11,7 @@ Perl modules you'll need
 
 How to use
 * Move GelfPush.pm into your perl @INC path
+  * Change the paths in GelfPush.pm to the production log files (Will be changed to be defaults in release)
 * Create /etc/gelfPush.conf from the gelfPush.conf-example file
   * Change gelfPush.pl to use the correct config path (This will be an option in future releases)
 * Run gelfPush.pl
