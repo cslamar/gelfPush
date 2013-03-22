@@ -94,7 +94,7 @@ sub watcher_secure {
 	
 	### Production def
 	# my $file = File::Tail->new(name => '/var/log/secure', interval=>1, maxinterval=>1);
-	my $file = File::Tail->new(name => 'logs/scratch_secure.log', interval=>1, maxinterval=>1);
+	my $file = File::Tail->new(name => 'logs/secure.log', interval=>1, maxinterval=>1);
 	while( defined( my $line = $file->read ) ) {
 		chomp($line);
 		my $rule = $line;
@@ -108,16 +108,24 @@ sub watcher_secure {
 #			print "Full: $full\n";
 			sendToGraylog( 4, 'Secure Log', '/var/log/secure', $short, $full, $hostname );
 				# level, facility, file, short, long, hostname
-		} elsif ( $rule =~ m/sshd/ ) {
+		} elsif ( $rule =~ m/sshd/ && $rule !~ m/authentication failure/) {
 			if ( $rule =~ m/Accepted/ && $rule !~ m/cacti/ ) {
 				(my $who, my $from) = $rule =~ m/sshd.+ for (\S+) from (\S+)/;
-				print "SSH: $who from $from\n";
+#				print "SSH: $who from $from\n";
 				my $short =  "SSH: $who from $from";
 				(my $tmpFull) = $rule =~ m/sshd\[\d+\]\: (.*)/;
 				my $full = "SSH: " . $tmpFull;
 #				print "SSHFULL $full\n";
 				sendToGraylog( 4, 'Secure Log', '/var/log/secure', $short, $full, $hostname );
 			}
+		} elsif ( $rule =~ m/pam_sss\(sshd\:auth\)\: authentication failure/ ) {
+			(my $from, my $who) = $rule =~ m/rhost\=(\S+) user\=(\S+)/;
+#			print "SSH FAILURE: $who from $from\n";
+			my $short = "SSH FAILURE: $who from $from";
+			(my $tmpFull) = $rule =~ m/sshd\[\d+\]\: (.*)/;
+			my $full = "SSH: " . $tmpFull;
+#			print "SSHFULL $full\n";
+			sendToGraylog( 2, 'Secure Log', '/var/log/secure', $short, $full, $hostname );
 		}
 	}
 }
