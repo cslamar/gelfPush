@@ -8,3 +8,11 @@ Perl modules you'll need
 * JSON::XS
 * File::Tail
 * Config::INI::Reader
+
+How to use
+* Move GelfPush.pm into your perl @INC path
+* Create /etc/gelfPush.conf from the gelfPush.conf-example file
+** Change gelfPush.pl to use the correct config path (This will be an option in future releases)
+* Run gelfPush.pl
+
+More on configuration and runtime instructions to come.
