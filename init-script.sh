@@ -14,7 +14,7 @@ RETVAL=0
 prog="gelfPush"
 thelock=/var/log/subsys/gelfPush
 
-# Start the service FOO
+# Start the service gelfPush
 start() {
 	[ -f /etc/gelfPush.conf ] || exit 6
 	echo -n $"Starting $prog: "
@@ -29,7 +29,7 @@ start() {
 	echo
 	return $RETVAL
 }
-# Restart the service FOO
+# Stop the service gelfPush
 stop() {
 	echo -n $"Stopping $prog: "
 	if [ UID -ne 0 ]; then
@@ -43,15 +43,6 @@ stop() {
 	echo
 	return $RETVAL
 }
-
-reload(){
-	echo -n $"Reloading $prog: "
-	killproc gelfPush -HUP
-	RETVAL=$?
-	echo
-	return $RETVAL
-}
-
 restart(){
 	stop
 	start
@@ -68,10 +59,7 @@ case "$1" in
 		status gelfPush
 		$RETVAL=$?
 		;;
-	reload)
-		reload
-		;;
-	restart)
+	restart|reload)
 		stop
 		start
 		;;
