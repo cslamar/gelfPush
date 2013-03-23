@@ -3,7 +3,7 @@
 use feature qw( switch );
 use warnings;
 use GelfPush;
-use Config::INI::Reader;
+use Config::INIFiles;
 use Data::Dumper;
 use threads;
 
@@ -37,22 +37,28 @@ $SIG{'TERM'} = 'TERM_handler';
 
 my (@inis_enabled, $graylog2_sever, @watcherThreads);
 
-### Read the config file in and set variables ###
-my $config = Config::INI::Reader->read_file('gelfPush.conf') or die("$!\n");
+my $config = Config::IniFiles->new( -file => "gelfPush.conf" );
+# my $config = Config::IniFiles->new( -file => "/etc/gelfPush.conf" );
 
-### Production:
-# my $config = Config::INI::Reader->read_file('/etc/gelfPush.conf') or die("$!\n");
 
-foreach my $block (keys %$config) {
-	print "Keys: $block\n";
-	if( $block ne 'GLOBAL' && $config->{$block}->{'enabled'} == 1) {
+#foreach my $block (keys %$config) {
+#	print "Keys: $block\n";
+#	if( $block ne 'GLOBAL' && $config->{$block}->{'enabled'} == 1) {
+#		push( @inis_enabled, $block );
+#	}
+#}
+
+foreach $block ( $config->Sections() ) {
+	print "Section: $block\n";
+	if( $block ne 'GLOBAL' && $config->val( $block, 'enabled' ) == 1 ) {
 		push( @inis_enabled, $block );
 	}
 }
 
 print "Inis enabled: " . @inis_enabled . "\n";
 print Dumper( @inis_enabled );
-$graylog2_server = $config->{'GLOBAL'}->{'graylog2_sever'};
+#$graylog2_server = $config->{'GLOBAL'}->{'graylog2_sever'};
+$graylog2_server = $config->val('GLOBAL', 'graylog2_sever');
 print "Server: $graylog2_server\n";
 
 for my $action (@inis_enabled) {
