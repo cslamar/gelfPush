@@ -3,18 +3,31 @@
 use feature qw( switch );
 use warnings;
 use GelfPush;
-use Config::INIFiles;
+use Config::IniFiles;
 use Data::Dumper;
 use threads;
+use Getopt::Long;
 
-my $counter = 0;
+my (@inis_enabled, $graylog2_sever, @watcherThreads, $debug, $config);
+my $options = GetOptions(
+				"debug" => \$debug,
+				"help" => \$help );
+				
+if( defined($debug) ) {
+	print "Debugging is on!\n";
+}
+if( defined($help) ) {
+	print "gelfPush [options]\n";
+	print "	--help	Displays this help screen\n";
+	print "	--debug	Turns on debugging\n";
+	exit(0);
+}
 
 sub INT_handler {
 	print "Hi There!  Getting a list of threads for you!\n";
 	foreach my $thr (threads->list()) {
 		print "Thread " . $thr->tid() . " is about to die!\n";
 		$thr->kill('KILL')->join();
-		$counter++;	
 	}
 	exit(-1);
 }
@@ -26,7 +39,6 @@ sub TERM_handler {
 	foreach my $thr (threads->list()) {
 		print "Thread " . $thr->tid() . " is about to die!\n";
 		$thr->kill('KILL')->join();
-		$counter++;	
 	}
 	exit(0);
 }
@@ -35,32 +47,34 @@ $SIG{'INT'} = 'INT_handler';
 $SIG{'HUP'} = 'HUP_handler';
 $SIG{'TERM'} = 'TERM_handler';
 
-my (@inis_enabled, $graylog2_sever, @watcherThreads);
-
-my $config = Config::IniFiles->new( -file => "gelfPush.conf" );
-# my $config = Config::IniFiles->new( -file => "/etc/gelfPush.conf" );
+if( $debug ) {
+	$config = Config::IniFiles->new( -file => "gelfPush.conf" ) or die("$!\n");
+} else {
+	$config = Config::IniFiles->new( -file => "/etc/gelfPush.conf" ) or die("$!\n");
+}
 
 foreach $block ( $config->Sections() ) {
-	print "Section: $block\n";
+	if($debug) { print "Section: $block\n"; }
 	if( $block ne 'GLOBAL' && $config->val( $block, 'enabled' ) == 1 ) {
 		push( @inis_enabled, $block );
 	}
 }
 
-print "Inis enabled: " . @inis_enabled . "\n";
-print Dumper( @inis_enabled );
-#$graylog2_server = $config->{'GLOBAL'}->{'graylog2_sever'};
-$graylog2_server = $config->val('GLOBAL', 'graylog2_sever');
-print "Server: $graylog2_server\n";
+if( @inis_enabled == 0 ) {
+	die("No blocks are enabled\n");
+} else {
+	print "Inis enabled: " . @inis_enabled . "\n";
+	if( $debug ) { print Dumper( @inis_enabled ); }
+}
+$graylog2_server = $config->val('GLOBAL', 'graylog2_sever') or die("No graylog2_server defined in [GLOBAL]\n");
+
+if($debug) { print "Server: $graylog2_server\n"; }
 
 for my $action (@inis_enabled) {
 	print "Action: $action\n";
-#	my $thr = threads->create( \&spawn_watcher, $graylog2_server, $action )->detach();
 	my $thr = threads->create( \&spawn_watcher, $graylog2_server, $action );
 	push(@watcherThreads, $thr);
 }
-
-
 
 while(1) { }
 
@@ -69,14 +83,15 @@ sub spawn_watcher {
 	my $hostname = $_[0];
 	my $watcher = $_[1];
 	
-	print "Graylog2 Server: $hostname\n";
+	if($debug) { print "Graylog2 Server: $hostname\n"; }
+	
 	given($watcher) {
 		when("APACHE_LOGGING") {
-			print "Apache log watching enabled...\n";
+			if($debug) { print "Apache log watching enabled...\n"; }
 			GelfPush::watcher_apache_access($hostname);
 		}
 		when("SECURE_LOG") {
-			print "Secure log watching enabled...\n";
+			if($debug) { print "Secure log watching enabled...\n"; }
 			GelfPush::watcher_secure($hostname);
 		}
 	}
