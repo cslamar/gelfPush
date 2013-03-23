@@ -40,14 +40,6 @@ my (@inis_enabled, $graylog2_sever, @watcherThreads);
 my $config = Config::IniFiles->new( -file => "gelfPush.conf" );
 # my $config = Config::IniFiles->new( -file => "/etc/gelfPush.conf" );
 
-
-#foreach my $block (keys %$config) {
-#	print "Keys: $block\n";
-#	if( $block ne 'GLOBAL' && $config->{$block}->{'enabled'} == 1) {
-#		push( @inis_enabled, $block );
-#	}
-#}
-
 foreach $block ( $config->Sections() ) {
 	print "Section: $block\n";
 	if( $block ne 'GLOBAL' && $config->val( $block, 'enabled' ) == 1 ) {
