@@ -57,18 +57,22 @@ sub sendToGraylog {
 }
 
 sub watcher_apache_access {
-	### ARGS: Hostname
+	### ARGS: Hostname, Debug
 	#
 	# Assumed Log Format:
 	# "%h - %{X-Forwarded-For}i - %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\""
 	
+	my ($file);
 	my $hostname = $_[0];
+	my $debug = $_[1];
 	
 	$SIG{'KILL'} = sub { threads->exit(); };
 	
-	### Production def
-	# my $file = File::Tail->new(name => '/var/log/httpd/access_log', interval=>1, maxinterval=>1);
-	my $file = File::Tail->new(name => 'logs/access.log', interval=>1, maxinterval=>1);
+	if( $debug ) {
+		$file = File::Tail->new(name => 'logs/access.log', interval=>1, maxinterval=>1) or die("$!\n");
+	} else {
+		$file = File::Tail->new(name => '/var/log/httpd/access_log', interval=>1, maxinterval=>1) or die("$!\n");
+	}
 	
 	while( defined( my $line = $file->read ) ) {
 		chomp($line);
@@ -91,15 +95,19 @@ sub watcher_apache_access {
 }
 
 sub watcher_secure {
-	### ARGS: Hostname
-	
+	### ARGS: Hostname, debug
+	my ($file);
 	my $hostname = $_[0];
+	my $debug = $_[1];
 	
 	$SIG{'KILL'} = sub { threads->exit(); };
 	
-	### Production def
-	# my $file = File::Tail->new(name => '/var/log/secure', interval=>1, maxinterval=>1);
-	my $file = File::Tail->new(name => 'logs/secure.log', interval=>1, maxinterval=>1);
+	if($debug) {
+		$file = File::Tail->new(name => 'logs/secure.log', interval=>1, maxinterval=>1) or die("$!\n");
+	} else {
+		$file = File::Tail->new(name => '/var/log/secure', interval=>1, maxinterval=>1) or die("$!\n");
+	}
+	
 	while( defined( my $line = $file->read ) ) {
 		chomp($line);
 		my $rule = $line;

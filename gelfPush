@@ -87,12 +87,20 @@ sub spawn_watcher {
 	
 	given($watcher) {
 		when("APACHE_LOGGING") {
-			if($debug) { print "Apache log watching enabled...\n"; }
-			GelfPush::watcher_apache_access($hostname);
+			if($debug) {
+				print "Apache log watching enabled...\n";
+				GelfPush::watcher_apache_access($hostname, $debug);
+			} else {
+				GelfPush::watcher_apache_access($hostname);
+			}
 		}
 		when("SECURE_LOG") {
-			if($debug) { print "Secure log watching enabled...\n"; }
-			GelfPush::watcher_secure($hostname);
+			if($debug) {
+				print "Secure log watching enabled...\n";
+				GelfPush::watcher_secure($hostname, $debug);
+			} else {
+				GelfPush::watcher_secure($hostname);
+			}
 		}
 	}
 }
