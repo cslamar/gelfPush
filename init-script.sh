@@ -12,7 +12,7 @@
 RETVAL=0
 
 prog="gelfPush"
-thelock=/var/log/subsys/gelfPush
+thelock=/var/lock/subsys/gelfPush
 
 # Start the service gelfPush
 start() {

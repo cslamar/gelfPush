@@ -63,7 +63,7 @@ foreach $block ( $config->Sections() ) {
 if( @inis_enabled == 0 ) {
 	die("No blocks are enabled\n");
 } else {
-	print "Inis enabled: " . @inis_enabled . "\n";
+	print "Ini Blocks enabled: " . @inis_enabled . "\n";
 	if( $debug ) { print Dumper( @inis_enabled ); }
 }
 $graylog2_server = $config->val('GLOBAL', 'graylog2_sever') or die("No graylog2_server defined in [GLOBAL]\n");
