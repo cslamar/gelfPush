@@ -4,7 +4,7 @@ gelfPush
 Daemon to push log messages to Graylog2 via GELF
 
 System requirements
-* EPEL repository
+* [EPEL repository](http://fedoraproject.org/wiki/EPEL)
 
 Perl modules you'll need (RPM Package names)
 * Config::INIFiles (perl-Config-IniFiles.noarch)
