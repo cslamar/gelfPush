@@ -22,7 +22,7 @@ start() {
 		RETVAL=1
 		failure
 	else
-		daemon /usr/local/sbin/gelfPush
+		daemon /usr/local/sbin/gelfPush &
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && touch $thelock
 	fi;
