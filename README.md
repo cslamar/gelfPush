@@ -3,11 +3,13 @@ gelfPush
 
 Daemon to push log messages to Graylog2 via GELF
 
-Perl modules you'll need
-* Config::Simple
+System requirements
+* EPEL repository
+
+Perl modules you'll need (RPM Package names)
+* Config::INIFiles (perl-Config-IniFiles.noarch)
 * JSON::XS
-* File::Tail
-* Config::INI::Reader
+* File::Tail (perl-File-Tail.noarch)
 
 How to use
 * Move GelfPush.pm into your perl @INC path
