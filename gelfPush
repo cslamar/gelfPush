@@ -2,7 +2,7 @@
 
 use feature qw( switch );
 use warnings;
-use GelfPush;
+use GelfPush::GelfPush;
 use Config::IniFiles;
 use Data::Dumper;
 use threads;
