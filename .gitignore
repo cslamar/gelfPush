@@ -18,4 +18,4 @@ pm_to_blib
 *.conf
 *.log
 scratch/
-test.pl
+test*.pl

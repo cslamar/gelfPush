@@ -67,7 +67,7 @@ sub watcher_apache_access {
 	$SIG{'KILL'} = sub { threads->exit(); };
 	
 	### Production def
-	# my $file = File::Tail->new(name => '/var/www/httpd/access_log', interval=>1, maxinterval=>1);
+	# my $file = File::Tail->new(name => '/var/log/httpd/access_log', interval=>1, maxinterval=>1);
 	my $file = File::Tail->new(name => 'logs/access.log', interval=>1, maxinterval=>1);
 	
 	while( defined( my $line = $file->read ) ) {

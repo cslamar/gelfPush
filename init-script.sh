@@ -32,7 +32,7 @@ start() {
 # Stop the service gelfPush
 stop() {
 	echo -n $"Stopping $prog: "
-	if [ UID -ne 0 ]; then
+	if [ $UID -ne 0 ]; then
 		RETVAL=1
 		failure
 	else
@@ -57,7 +57,7 @@ case "$1" in
 		;;
 	status)
 		status gelfPush
-		$RETVAL=$?
+		RETVAL=$?
 		;;
 	restart|reload)
 		stop
