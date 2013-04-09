@@ -8,7 +8,7 @@ System requirements
 
 Perl modules you'll need (RPM Package names)
 * Config::INIFiles (perl-Config-IniFiles.noarch)
-* JSON::XS
+* JSON::XS (perl-JSON-XS)
 * File::Tail (perl-File-Tail.noarch)
 
 How to use
